@@ -268,7 +268,7 @@
           '<p class="loading">Loading...</p>';
         const forecastType = document.getElementById("forecastType").value;
         if (forecastType === "daily") {
-          await getDailyWeather();
+          await getDailyWeather()
         } else if (forecastType === "5day") {
           await getFiveDayWeather();
         } else if (forecastType === "hourly") {

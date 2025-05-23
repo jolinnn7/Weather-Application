@@ -195,20 +195,114 @@
           margin-right: auto;
         }
       }
+      body.dark-theme {
+  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+  color: #f1f1f1;
+}
+body.dark-theme #mainContentWrapper {
+  background: #232526cc;
+  color: #f1f1f1;
+}
+body.dark-theme .sidebar {
+  background: linear-gradient(135deg, #232526 60%, #414345 100%);
+  color: #f1f1f1;
+}
+body.dark-theme .forecast {
+  background: #232526e6;
+  color: #f1f1f1;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+body.dark-theme .icon-bg {
+  background: #333941 !important;
+}
+body.dark-theme .fact {
+  color: #e0eafc;
+}
+body.dark-theme .links a {
+  color: #90caf9;
+}
+body.dark-theme .links a:hover {
+  color: #fff;
+}
+body.dark-theme #alertBox {
+  background: linear-gradient(90deg, #444 80%, #222 100%);
+  color: #ffe066;
+  border: 1px solid #ffe06644;
+}
+body.dark-theme .input-row input,
+body.dark-theme .input-row select {
+  background: #232526;
+  color: #f1f1f1;
+  border: 1px solid #444;
+}
+body.dark-theme .input-row input:focus,
+body.dark-theme .input-row select:focus {
+  border: 1.5px solid #ffe066;
+}
+body.dark-theme #forecastBtn {
+  background: #ffe066;
+  color: #232526;
+}
+body.dark-theme #forecastBtn:hover:enabled {
+  background: #ffd60a;
+}
+body.dark-theme .unit-row label {
+  color: #ffe066;
+}
+body.dark-theme .error {
+  color: #ff6b6b;
+}
+body.dark-theme .loading {
+  color: #b5d0e6;
+}
     </style>
   </head>
-  <body>
+  <body class="dark-theme">
     <header>
       <h1>🌦️ Weather Forecast</h1>
       <div style="font-size:1.1em;opacity:0.85;">Your daily weather &amp; earthquake dashboard</div>
     </header>
     <div class="sidebar">
+      <!-- 1. Weather Fact Rotator -->
       <div>
         <h3>🌤️ Weather Fact</h3>
         <div class="fact" id="weatherFact">
-          The highest temperature ever recorded on Earth was 56.7°C (134°F) in Death Valley, California.
+          Loading fact...
         </div>
       </div>
+      <!-- Local Time & Date -->
+      <div>
+        <h3>🕒 Local Time</h3>
+        <div class="fact" id="localTime">
+          --
+        </div>
+      </div>
+      <!-- Sunrise & Sunset Times -->
+      <div>
+        <h3>🌅 Sun Times</h3>
+        <div class="fact" id="sunTimes">
+          --
+        </div>
+      </div>
+      <!-- Air Quality Index -->
+      <div>
+        <h3>🌫️ Air Quality</h3>
+        <div class="fact" id="aqi">
+          --
+        </div>
+      </div>
+      <!-- Theme Switcher -->
+      <div>
+        <h3>🎨 Theme</h3>
+        <button id="themeBtn" style="padding:6px 16px;border-radius:8px;border:none;background:#0077b6;color:#fff;cursor:pointer;">Toggle Theme</button>
+      </div>
+      <!-- Recent Searches -->
+      <div>
+        <h3>🕑 Recent Searches</h3>
+        <ul id="recentSearches" style="padding-left:18px;margin:0;font-size:0.98em;"></ul>
+        <button id="clearRecentBtn" style="margin-top:8px;padding:4px 12px;border-radius:6px;border:none;background:#b22222;color:#fff;cursor:pointer;font-size:0.95em;">Clear Recent</button>
+      </div>
+      <!-- Quick Links (keep as is) -->
       <div>
         <h3>🔗 Quick Links</h3>
         <div class="links">
@@ -255,6 +349,7 @@
     <script>
       const apiKey = "98721cea9b33f91f1d676549e01a829b"; // OpenWeatherMap API key
       const apiEarthquake = "49CAbMaEXio18P1BLaX7e9-s1Xdvs1q3CIxS_3SW"; // Earthquake API Key
+      const apiGeoNames = "Geokit::Geocoders::GeonamesGeocoder.key = 'jolibee'"; // GeoNames API username 
 
       // background color for the icon based on weather type
       function getIconBgColor(main) {
@@ -482,6 +577,12 @@
                 <p>🌧️ Chance of rain: <strong>${chanceOfRain}%</strong></p>
             </div>
         `;
+        updateSunTimes(data.sys.sunrise, data.sys.sunset);
+        // For demo, show alert if wind > 15 m/s or temp > 40°C
+        let alert = "";
+        if (data.wind.speed > 15) alert += "High wind! ";
+        if (data.main.temp > 40) alert += "Extreme heat! ";
+        updateSevereAlert(alert);
       }
 
       // Show 5-day forecast
@@ -554,6 +655,189 @@
           document.getElementById("alertMessage").innerHTML = alertMsg;
           console.error("Error fetching earthquake data:", e);
         }
+      }
+
+      // Weather Facts Rotator
+      const facts = [
+        "The highest temperature ever recorded on Earth was 56.7°C (134°F) in Death Valley, California.",
+        "Lightning strikes the Earth about 8.6 million times a day.",
+        "The coldest temperature ever recorded was -89.2°C (-128.6°F) at Vostok Station, Antarctica.",
+        "Raindrops can fall at speeds of about 22 miles per hour.",
+        "A cubic mile of ordinary fog contains less than a gallon of water.",
+        "Snowflakes can fall at speeds as slow as 1 mph.",
+        "The wettest place on Earth is Mawsynram, India.",
+        "The fastest wind speed ever recorded was 253 mph during Tropical Cyclone Olivia."
+      ];
+      function rotateFact() {
+        const fact = facts[Math.floor(Math.random() * facts.length)];
+        document.getElementById("weatherFact").textContent = fact;
+      }
+      rotateFact();
+      setInterval(rotateFact, 8000);
+
+      // Local Time & Date (shows local time for the input city)
+      async function updateLocalTime() {
+        const city = document.getElementById("cityInput").value.trim();
+        if (!city) {
+          document.getElementById("localTime").textContent = "--";
+          return;
+        }
+        try {
+          // Get city coordinates from OpenWeatherMap
+          const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${apiKey}`);
+          const geoData = await geoRes.json();
+          if (!geoData.length) {
+            document.getElementById("localTime").textContent = "--";
+            return;
+          }
+          const { lat, lon, country } = geoData[0];
+
+          // Get timezone info from GeoNames API (replace 'demo' with your username if you have one)
+          const tzRes = await fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${lon}&username=jolibee`);
+          const tzData = await tzRes.json();
+          if (tzData.time) {
+            // Use tzData.time (already local time string)
+            document.getElementById("localTime").textContent = `${tzData.time} (${country})`;
+          } else {
+            document.getElementById("localTime").textContent = "--";
+          }
+        } catch {
+          document.getElementById("localTime").textContent = "--";
+        }
+      }
+      setInterval(updateLocalTime, 10000); // update every 10 seconds
+      document.getElementById("cityInput").addEventListener("input", updateLocalTime);
+
+      // Sunrise & Sunset Times (updates on forecast)
+      function updateSunTimes(sunrise, sunset) {
+        if (sunrise && sunset) {
+          const sr = new Date(sunrise * 1000).toLocaleTimeString();
+          const ss = new Date(sunset * 1000).toLocaleTimeString();
+          document.getElementById("sunTimes").textContent = `Sunrise: ${sr}\nSunset: ${ss}`;
+        } else {
+          document.getElementById("sunTimes").textContent = "--";
+        }
+      }
+
+      // Air Quality Index (updates on forecast)
+      async function updateAQI(city) {
+        if (!city) {
+          document.getElementById("aqi").textContent = "--";
+          return;
+        }
+        try {
+          const res = await fetch(`https://api.waqi.info/feed/${encodeURIComponent(city)}/?token=demo`);
+          const data = await res.json();
+          if (data.status === "ok") {
+            document.getElementById("aqi").textContent = `AQI: ${data.data.aqi}`;
+          } else {
+            document.getElementById("aqi").textContent = "Unavailable";
+          }
+        } catch {
+          document.getElementById("aqi").textContent = "Unavailable";
+        }
+      }
+
+      // Severe Weather Alerts (demo, updates on forecast)
+      function updateSevereAlert(alert) {
+        document.getElementById("severeAlert").textContent = alert || "No severe weather alerts.";
+      }
+
+      // Make dark mode default
+      document.body.classList.add("dark-theme");
+      document.getElementById("themeBtn").textContent = "Light Mode";
+
+      // Theme Switcher
+      document.getElementById("themeBtn").onclick = function () {
+        document.body.classList.toggle("dark-theme");
+        this.textContent = document.body.classList.contains("dark-theme") ? "Light Mode" : "Dark Mode";
+      };
+
+      // Recent Searches
+      function addRecentSearch(city) {
+        if (!city) return;
+        let searches = JSON.parse(localStorage.getItem("recentSearches") || "[]");
+        searches = searches.filter(c => c.toLowerCase() !== city.toLowerCase());
+        searches.unshift(city);
+        if (searches.length > 5) searches = searches.slice(0, 5);
+        localStorage.setItem("recentSearches", JSON.stringify(searches));
+        renderRecentSearches();
+      }
+      function renderRecentSearches() {
+        let searches = JSON.parse(localStorage.getItem("recentSearches") || "[]");
+        const ul = document.getElementById("recentSearches");
+        ul.innerHTML = "";
+        searches.forEach(city => {
+          const li = document.createElement("li");
+          li.style.cursor = "pointer";
+          li.textContent = city;
+          li.onclick = () => {
+            document.getElementById("cityInput").value = city;
+            showForecast();
+          };
+          ul.appendChild(li);
+        });
+      }
+      renderRecentSearches();
+
+      // Add clear recent searches button functionality
+      document.getElementById("clearRecentBtn").onclick = function () {
+        localStorage.removeItem("recentSearches");
+        renderRecentSearches();
+      };
+
+      // Hook into forecast functions to update widgets
+      async function showForecast() {
+        const btn = document.getElementById("forecastBtn");
+        btn.disabled = true;
+        document.getElementById("weatherResult").innerHTML =
+          '<p class="loading">Loading...</p>';
+        const forecastType = document.getElementById("forecastType").value;
+        const city = document.getElementById("cityInput").value.trim();
+        addRecentSearch(city);
+        updateLocalTime();
+        updateAQI(city);
+        if (forecastType === "daily") {
+          await getDailyWeather();
+        } else if (forecastType === "5day") {
+          await getFiveDayWeather();
+        } else if (forecastType === "hourly") {
+          await getHourlyWeather();
+        }
+        btn.disabled = false;
+      }
+
+      // Update sunrise/sunset and severe alerts in displayDailyWeather
+      function displayDailyWeather(data, tempUnit, windUnit) {
+        const weatherResult = document.getElementById("weatherResult");
+        const tempSymbol = tempUnit === 'imperial' ? '°F' : '°C';
+        const windSymbol = windUnit === 'imperial' ? 'mph' : 'km/h';
+        const windSpeed = convertWindSpeed(data.wind.speed, windUnit);
+        const icon = data.weather[0].icon;
+        const iconUrl = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+        const main = data.weather[0].main;
+        const iconBg = getIconBgColor(main);
+        const chanceOfRain = data.weather[0].main === "Rain" ? 100 : 0;
+        const description = capitalize(data.weather[0].description);
+
+        weatherResult.innerHTML = `
+            <div class="forecast">
+                <h2>Right now in <span style='color:#0077b6'>${data.name}</span>:</h2>
+                <div class="icon-bg" style="background:${iconBg}">
+                    <img src="${iconUrl}" alt="${description}">
+                </div>
+                <p style="font-size:1.1em;">It's <strong>${description}</strong> and <strong>${data.main.temp}${tempSymbol}</strong> (feels like <strong>${data.main.feels_like}${tempSymbol}</strong>).</p>
+                <p>💧 Humidity: <strong>${data.main.humidity}%</strong></p>
+                <p>💨 Wind: <strong>${windSpeed} ${windSymbol}</strong></p>
+                <p>🌧️ Chance of rain: <strong>${chanceOfRain}%</strong></p>
+            </div>
+        `;
+        updateSunTimes(data.sys.sunrise, data.sys.sunset);
+        // For demo, show alert if wind > 15 m/s or temp > 40°C
+        let alert = "";
+        if (data.wind.speed > 15) alert += "High wind! ";
+        if (data.main.temp > 40) alert += "Extreme heat! ";
+        updateSevereAlert(alert);
       }
     </script>
   </body>

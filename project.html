@@ -6,25 +6,54 @@
     <title>Daily Weather Forecast</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
+        font-family: 'Segoe UI', Arial, sans-serif;
         text-align: center;
-        margin: 20px;
-        /* New background gradient */
+        margin: 0;
         min-height: 100vh;
         background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+      }
+      header {
+        background: #0077b6;
+        color: #fff;
+        padding: 30px 0 20px 0;
+        border-bottom-left-radius: 30px;
+        border-bottom-right-radius: 30px;
+        box-shadow: 0 2px 12px rgba(0, 119, 182, 0.08);
+        margin-bottom: 30px;
+      }
+      h1 {
+        font-size: 2.3em;
+        margin: 0;
+        letter-spacing: 1px;
+      }
+      #mainContentWrapper {
+        margin: 0 auto;
+        max-width: 600px;
+        background: #ffffffcc;
+        border-radius: 18px;
+        box-shadow: 0 4px 24px rgba(100, 150, 200, 0.10);
+        padding: 30px 20px 20px 20px;
       }
       #weatherResult {
         margin-top: 20px;
       }
       .forecast {
-        margin-top: 10px;
-        border: 1px solid #ccc;
-        padding: 10px;
-        border-radius: 5px;
+        margin-top: 18px;
+        border: none;
+        padding: 18px 14px 14px 14px;
+        border-radius: 14px;
         display: inline-block;
         text-align: left;
-        background: #f9f9f9cc; /* slightly transparent for effect */
-        box-shadow: 0 2px 8px rgba(100, 150, 200, 0.08);
+        background: #f9f9f9e6;
+        box-shadow: 0 2px 12px rgba(100, 150, 200, 0.10);
+        min-width: 220px;
+        max-width: 320px;
+        margin-bottom: 18px;
+        transition: transform 0.15s;
+      }
+      .forecast:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 24px rgba(100, 150, 200, 0.18);
       }
       .icon-bg {
         width: 80px;
@@ -34,7 +63,7 @@
         align-items: center;
         justify-content: center;
         margin: 0 auto 10px auto;
-        box-shadow: 0 1px 6px rgba(100, 150, 200, 0.1);
+        box-shadow: 0 1px 6px rgba(100, 150, 200, 0.10);
       }
       .forecast img {
         width: 60px;
@@ -54,73 +83,172 @@
         border: 1px solid #ffeeba;
         color: #856404;
         box-shadow: 0 2px 8px rgba(200, 180, 100, 0.08);
-        position: static;
-        float: none;
-        margin: 20px auto 0 auto;
+        margin: 24px auto 0 auto;
         max-width: 500px;
         min-width: 220px;
         text-align: left;
-        z-index: 10;
+        border-radius: 18px;
+        padding: 18px 18px 10px 18px;
+        font-size: 1.08em;
       }
-      #mainContentWrapper {
-        margin-left: 0;
-        min-width: 300px;
+      .input-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .input-row input,
+      .input-row select {
+        font-size: 1.08em;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid #b5d0e6;
+        outline: none;
+        transition: border 0.2s;
+      }
+      .input-row input:focus,
+      .input-row select:focus {
+        border: 1.5px solid #0077b6;
+      }
+      #forecastBtn {
+        background: #0077b6;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 22px;
+        font-size: 1.08em;
+        margin-left: 10px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,119,182,0.08);
+        transition: background 0.2s, transform 0.1s;
+      }
+      #forecastBtn:hover:enabled {
+        background: #0096c7;
+        transform: scale(1.04);
+      }
+      .unit-row {
+        margin: 10px 0 20px 0;
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .unit-row label {
+        margin-right: 6px;
+      }
+      .sidebar {
+        position: fixed;
+        top: 100px;
+        left: 0;
+        width: 220px;
+        height: calc(100% - 120px);
+        background: linear-gradient(135deg, #f1f8ff 60%, #e0eafc 100%);
+        border-top-right-radius: 24px;
+        border-bottom-right-radius: 24px;
+        box-shadow: 2px 0 16px rgba(100,150,200,0.07);
+        padding: 24px 18px 18px 18px;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 28px;
+      }
+      .sidebar h3 {
+        font-size: 1.13em;
+        margin: 0 0 8px 0;
+        color: #0077b6;
+      }
+      .sidebar .fact {
+        font-size: 0.98em;
+        color: #333;
+        margin-bottom: 10px;
+      }
+      .sidebar .links {
+        margin-top: 12px;
+      }
+      .sidebar .links a {
+        display: block;
+        color: #0077b6;
+        text-decoration: none;
+        margin-bottom: 7px;
+        font-size: 0.98em;
+        transition: color 0.2s;
+      }
+      .sidebar .links a:hover {
+        color: #023e8a;
+        text-decoration: underline;
       }
       @media (max-width: 900px) {
-        #alertBox,
-        #mainContentWrapper {
-          float: none;
-          position: static;
-          margin: 20px auto 0 auto;
-          max-width: 95vw;
+        .sidebar {
+          display: none;
         }
         #mainContentWrapper {
-          margin-left: 0;
+          margin-left: auto;
+          margin-right: auto;
+        }
+      }
+      @media (max-width: 700px) {
+        #mainContentWrapper {
+          margin-left: auto;
+          margin-right: auto;
         }
       }
     </style>
   </head>
   <body>
-    <h1>🌦️ Weather Forecast</h1>
-    <input
-      type="text"
-      id="cityInput"
-      placeholder="Type a city, e.g. London"
-      autocomplete="on"
-    />
-    <select id="forecastType">
-      <option value="daily">Today's Weather</option>
-      <option value="5day">5-Day Forecast</option>
-      <option value="hourly">Hourly Forecast</option>
-    </select>
-
-    <button id="forecastBtn" onclick="showForecast()">Show Forecast</button>
-    <div id="weatherResult"></div>
-
-    <!-- selection of  temperature and wind units -->
-  <div style="margin: 10px 0 20px 0;">
-      <label for="unitTemp">Temperature:</label>
-      <select id="unitTemp" onchange="showForecast()">
-        <option value="metric">°C</option>
-        <option value="imperial">°F</option>
-      </select>
-      <label for="unitWind" style="margin-left:15px;">Wind:</label>
-      <select id="unitWind" onchange="showForecast()">
-        <option value="metric">km/h</option>
-        <option value="imperial">mph</option>
-      </select>
+    <header>
+      <h1>🌦️ Weather Forecast</h1>
+      <div style="font-size:1.1em;opacity:0.85;">Your daily weather &amp; earthquake dashboard</div>
+    </header>
+    <div class="sidebar">
+      <div>
+        <h3>🌤️ Weather Fact</h3>
+        <div class="fact" id="weatherFact">
+          The highest temperature ever recorded on Earth was 56.7°C (134°F) in Death Valley, California.
+        </div>
+      </div>
+      <div>
+        <h3>🔗 Quick Links</h3>
+        <div class="links">
+          <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap</a>
+          <a href="https://earthquake.usgs.gov/" target="_blank">USGS Earthquakes</a>
+          <a href="https://github.com/" target="_blank">GitHub</a>
+        </div>
+      </div>
     </div>
-    
-    <div
-      id="alertBox"
-      style="
-        margin: 20px auto 0 auto;
-        max-width: 500px;
-        padding: 15px;
-        border-radius: 30px;
-      "
-    >
-      <strong style="font-size:1.35em;">🌊 Regional Earthquake Alert:</strong>
+    <div id="mainContentWrapper">
+      <div class="input-row">
+        <input
+          type="text"
+          id="cityInput"
+          placeholder="Type a city, e.g. London"
+          autocomplete="on"
+        />
+        <select id="forecastType">
+          <option value="daily">Today's Weather</option>
+          <option value="5day">5-Day Forecast</option>
+          <option value="hourly">Hourly Forecast</option>
+        </select>
+        <button id="forecastBtn" onclick="showForecast()">Show Forecast</button>
+      </div>
+      <div class="unit-row">
+        <label for="unitTemp">Temperature:</label>
+        <select id="unitTemp" onchange="showForecast()">
+          <option value="metric">°C</option>
+          <option value="imperial">°F</option>
+        </select>
+        <label for="unitWind">Wind:</label>
+        <select id="unitWind" onchange="showForecast()">
+          <option value="metric">km/h</option>
+          <option value="imperial">mph</option>
+        </select>
+      </div>
+      <div id="weatherResult"></div>
+    </div>
+    <div id="alertBox">
+      <strong style="font-size:1.25em;">🌊 Regional Earthquake Alert:</strong>
       <span id="alertMessage">No current alerts.</span>
     </div>
 

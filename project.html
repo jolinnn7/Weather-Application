@@ -112,20 +112,18 @@
         border: 1.5px solid #0077b6;
       }
       #forecastBtn {
-        background: #0077b6;
+        background: linear-gradient(90deg, #0077b6 60%, #0096c7 100%);
         color: #fff;
+        font-weight: bold;
         border: none;
         border-radius: 8px;
         padding: 9px 22px;
-        font-size: 1.08em;
-        margin-left: 10px;
-        cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0,119,182,0.08);
-        transition: background 0.2s, transform 0.1s;
+        box-shadow: 0 2px 8px rgba(0,119,182,0.10);
+        transition: background 0.18s, transform 0.1s;
       }
       #forecastBtn:hover:enabled {
-        background: #0096c7;
-        transform: scale(1.04);
+        background: linear-gradient(90deg, #0096c7 60%, #48cae4 100%);
+        transform: scale(1.05);
       }
       .unit-row {
         margin: 10px 0 20px 0;
@@ -147,7 +145,7 @@
         background: linear-gradient(135deg, #f1f8ff 60%, #e0eafc 100%);
         border-top-right-radius: 24px;
         border-bottom-right-radius: 24px;
-        box-shadow: 2px 0 16px rgba(100,150,200,0.07);
+        box-shadow: 2px 0 16px rgba(100,150,200,0.13);
         padding: 24px 18px 18px 18px;
         z-index: 10;
         display: flex;
@@ -155,30 +153,14 @@
         align-items: flex-start;
         gap: 28px;
       }
-      .sidebar h3 {
-        font-size: 1.13em;
-        margin: 0 0 8px 0;
-        color: #0077b6;
-      }
-      .sidebar .fact {
-        font-size: 0.98em;
-        color: #333;
-        margin-bottom: 10px;
-      }
-      .sidebar .links {
-        margin-top: 12px;
-      }
-      .sidebar .links a {
-        display: block;
-        color: #0077b6;
-        text-decoration: none;
-        margin-bottom: 7px;
-        font-size: 0.98em;
-        transition: color 0.2s;
-      }
-      .sidebar .links a:hover {
-        color: #023e8a;
-        text-decoration: underline;
+      .sidebar.right-sidebar {
+        left: auto;
+        right: 0;
+        border-top-left-radius: 24px;
+        border-bottom-left-radius: 24px;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        box-shadow: -2px 0 16px rgba(100,150,200,0.07);
       }
       @media (max-width: 900px) {
         .sidebar {
@@ -255,6 +237,131 @@ body.dark-theme .error {
 body.dark-theme .loading {
   color: #b5d0e6;
 }
+
+/* Light mode sidebar styles */
+.sidebar {
+  background: linear-gradient(135deg, #f1f8ff 60%, #e0eafc 100%);
+  color: #232526; /* Dark text for readability */
+}
+.sidebar h3 {
+  color: #0077b6; /* Blue for light mode */
+  border-bottom: 1px solid #b5d0e6;
+}
+.sidebar .fact,
+.sidebar .links a,
+.sidebar .source {
+  color: #232526;
+}
+.sidebar .links a:hover {
+  color: #0077b6;
+}
+
+/* News Card Styles */
+#weatherNews .news-card {
+  background: #232526e6;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.13);
+  margin-bottom: 18px;
+  padding: 10px 10px 10px 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+#weatherNews .news-card:hover {
+  transform: scale(1.025);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+}
+#weatherNews .news-card img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #444;
+  flex-shrink: 0;
+}
+#weatherNews .news-card a {
+  color: #90caf9;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 1.04em;
+}
+#weatherNews .news-card a:hover {
+  text-decoration: underline;
+  color: #ffe066;
+}
+#weatherNews .news-card .source {
+  font-size: 0.92em;
+  color: #b5d0e6;
+  margin-top: 2px;
+}
+
+/* Sidebar Headings and Spacing */
+.sidebar h3 {
+  font-size: 1.13em;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  color: #0077b6; /* Blue for light mode */
+  border-bottom: 1px solid #b5d0e6;
+  padding-bottom: 3px;
+}
+body.dark-theme .sidebar h3 {
+  color: #ffe066; /* Yellow for dark mode */
+  border-bottom: 1px solid #4442;
+}
+.sidebar > div {
+  margin-bottom: 22px;
+}
+
+/* Improve input and button appearance */
+.input-row input,
+.input-row select {
+  border-radius: 12px;
+  border: 1.5px solid #444;
+  transition: box-shadow 0.18s;
+}
+.input-row input:focus,
+.input-row select:focus {
+  box-shadow: 0 0 0 2px #ffe06699;
+}
+
+/* Theme slider switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  vertical-align: middle;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #b5d0e6;
+  transition: .4s;
+  border-radius: 26px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px; width: 20px;
+  left: 3px; bottom: 3px;
+  background-color: #fff;
+  transition: .4s;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+}
+input:checked + .slider {
+  background-color: #0077b6;
+}
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
     </style>
   </head>
   <body class="dark-theme">
@@ -292,10 +399,14 @@ body.dark-theme .loading {
         </div>
       </div>
       <!-- Theme Switcher -->
-      <div>
-        <h3>🎨 Theme</h3>
-        <button id="themeBtn" style="padding:6px 16px;border-radius:8px;border:none;background:#0077b6;color:#fff;cursor:pointer;">Toggle Theme</button>
-      </div>
+     <div>
+  <h3>🎨 Theme</h3>
+  <label class="switch">
+    <input type="checkbox" id="themeSlider">
+    <span class="slider"></span>
+  </label>
+  <span id="themeLabel" style="margin-left:10px;">Light Mode</span>
+</div>
       <!-- Recent Searches -->
       <div>
         <h3>🕑 Recent Searches</h3>
@@ -312,12 +423,18 @@ body.dark-theme .loading {
         </div>
       </div>
     </div>
+    <div class="sidebar right-sidebar">
+      <h3>📰 Weather News</h3>
+      <div id="weatherNews" class="fact">
+        Loading news...
+      </div>
+    </div>
     <div id="mainContentWrapper">
       <div class="input-row">
         <input
           type="text"
           id="cityInput"
-          placeholder="Type a city, e.g. London"
+          placeholder="Type a city, e.g. Singapore"
           autocomplete="on"
         />
         <select id="forecastType">
@@ -350,6 +467,7 @@ body.dark-theme .loading {
       const apiKey = "98721cea9b33f91f1d676549e01a829b"; // OpenWeatherMap API key
       const apiEarthquake = "49CAbMaEXio18P1BLaX7e9-s1Xdvs1q3CIxS_3SW"; // Earthquake API Key
       const apiGeoNames = "Geokit::Geocoders::GeonamesGeocoder.key = 'jolibee'"; // GeoNames API username 
+      const apiNews = "b42163efcff94454bbfcc8477dc84452"; // News API key
 
       // background color for the icon based on weather type
       function getIconBgColor(main) {
@@ -743,14 +861,31 @@ body.dark-theme .loading {
         document.getElementById("severeAlert").textContent = alert || "No severe weather alerts.";
       }
 
-      // Make dark mode default
-      document.body.classList.add("dark-theme");
-      document.getElementById("themeBtn").textContent = "Light Mode";
+      // Theme Switcher (slider)
+      const themeSlider = document.getElementById("themeSlider");
+      const themeLabel = document.getElementById("themeLabel");
 
-      // Theme Switcher
-      document.getElementById("themeBtn").onclick = function () {
+      // Load theme from localStorage or default to dark
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark" || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.body.classList.add("dark-theme");
+        themeSlider.checked = true;
+        themeLabel.textContent = "Light Mode";
+      } else {
+        document.body.classList.remove("dark-theme");
+        themeSlider.checked = false;
+        themeLabel.textContent = "Dark Mode";
+      }
+
+      themeSlider.onchange = function () {
         document.body.classList.toggle("dark-theme");
-        this.textContent = document.body.classList.contains("dark-theme") ? "Light Mode" : "Dark Mode";
+        if (document.body.classList.contains("dark-theme")) {
+          themeLabel.textContent = "Light Mode";
+          localStorage.setItem("theme", "dark");
+        } else {
+          themeLabel.textContent = "Dark Mode";
+          localStorage.setItem("theme", "light");
+        }
       };
 
       // Recent Searches
@@ -839,6 +974,39 @@ body.dark-theme .loading {
         if (data.main.temp > 40) alert += "Extreme heat! ";
         updateSevereAlert(alert);
       }
+
+      // Fetch and display weather news
+      async function fetchWeatherNews() {
+  try {
+    // Query for Singapore weather news
+    const res = await fetch('https://newsapi.org/v2/everything?q=singapore%20weather%20forecast&language=en&pageSize=5&sortBy=publishedAt&apiKey=' + apiNews);
+    const data = await res.json();
+    console.log("NewsAPI response:", data); // For debugging
+    if (data.articles && data.articles.length > 0) {
+      document.getElementById("weatherNews").innerHTML = data.articles
+        .map(article => `
+      <div class="news-card">
+        ${article.urlToImage 
+  ? `<img src="${article.urlToImage}" alt="news image">` 
+  : `<img src="https://via.placeholder.com/60x60?text=No+Image" alt="no image">`}
+        <div>
+          <a href="${article.url}" target="_blank">${article.title}</a>
+          ${article.source && article.source.name ? `<div class="source">${article.source.name}</div>` : ''}
+        </div>
+      </div>
+    `)
+        .join('');
+    } else if (data.message) {
+      document.getElementById("weatherNews").textContent = "API error: " + data.message;
+    } else {
+      document.getElementById("weatherNews").textContent = "No news found. Try again later.";
+    }
+  } catch (e) {
+    document.getElementById("weatherNews").textContent = "Unable to load news.";
+    console.error("Weather News fetch error:", e);
+  }
+}
+fetchWeatherNews();
     </script>
   </body>
 </html>

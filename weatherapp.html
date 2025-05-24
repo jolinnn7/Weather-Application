@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Weather Forecast</title>
+  <link rel="stylesheet" href="design.css">
+</head>
+<body class="dark-theme">
+    <header>
+      <h1>🌦️ Weather Forecast</h1>
+      <div style="font-size:1.1em;opacity:0.85;">Your daily weather &amp; earthquake dashboard</div>
+    </header>
+    <div class="sidebar">
+      <!-- 1. Weather Fact Rotator -->
+      <div>
+        <h3>🌤️ Weather Fact</h3>
+        <div class="fact" id="weatherFact">
+          Loading fact...
+        </div>
+      </div>
+      <!-- Local Time & Date -->
+      <div>
+        <h3>🕒 Local Time</h3>
+        <div class="fact" id="localTime">
+          --
+        </div>
+      </div>
+      <!-- Theme Switcher -->
+     <div>
+  <h3>🎨 Theme</h3>
+  <label class="switch">
+    <input type="checkbox" id="themeSlider">
+    <span class="slider"></span>
+  </label>
+  <span id="themeLabel" style="margin-left:10px;">Light Mode</span>
+</div>
+      <!-- Recent Searches -->
+      <div>
+        <h3>🕑 Recent Searches</h3>
+        <ul id="recentSearches" style="padding-left:18px;margin:0;font-size:0.98em;"></ul>
+        <button id="clearRecentBtn" style="margin-top:8px;padding:4px 12px;border-radius:6px;border:none;background:#b22222;color:#fff;cursor:pointer;font-size:0.95em;">Clear Recent</button>
+      </div>
+      <!-- Quick Links (keep as is) -->
+      <div>
+        <h3>🔗 Quick Links</h3>
+        <div class="links">
+          <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap</a>
+          <a href="https://earthquake.usgs.gov/" target="_blank">USGS Earthquakes</a>
+          <a href="https://github.com/" target="_blank">GitHub</a>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar right-sidebar">
+      <h3>📰 Weather News</h3>
+      <div id="weatherNews" class="fact">
+        Loading news...
+      </div>
+    </div>
+    <div id="mainContentWrapper">
+      <div class="input-row">
+        <input
+          type="text"
+          id="cityInput"
+          placeholder="Type a city, e.g. Singapore"
+          autocomplete="on"
+        />
+        <select id="forecastType">
+          <option value="daily">Today's Weather</option>
+          <option value="5day">5-Day Forecast</option>
+          <option value="hourly">Hourly Forecast</option>
+        </select>
+        <button id="forecastBtn" onclick="showForecast()">Show Forecast</button>
+      </div>
+      <div class="unit-row">
+        <label for="unitTemp">Temperature:</label>
+        <select id="unitTemp" onchange="showForecast()">
+          <option value="metric">°C</option>
+          <option value="imperial">°F</option>
+        </select>
+        <label for="unitWind">Wind:</label>
+        <select id="unitWind" onchange="showForecast()">
+          <option value="metric">km/h</option>
+          <option value="imperial">mph</option>
+        </select>
+      </div>
+      <div id="weatherResult"></div>
+      <!-- Hidden elements for details logic -->
+      <div id="sunTimes" style="display:none"></div>
+      <div id="aqi" style="display:none"></div>
+      <div id="severeAlert" style="margin:10px 0 0 0;color:#b22222;font-weight:bold;"></div>
+    </div>
+    <div id="alertBox">
+      <strong style="font-size:1.25em;">🌊 Regional Earthquake Alert:</strong>
+      <span id="alertMessage">No current alerts.</span>
+    </div>
+
+    <script>
+const apiKey = "98721cea9b33f91f1d676549e01a829b"; 
+const apiNews = "b42163efcff94454bbfcc8477dc84452";
+
+// Background color for the icon based on weather type
+function getIconBgColor(main) {
+  switch (main) {
+    case "Clear": return "#ffe066";
+    case "Rain": return "#74c0fc";
+    case "Clouds": return "#adb5bd";
+    case "Snow": return "#f1f3f5";
+    case "Thunderstorm": return "#9775fa";
+    case "Drizzle": return "#b2f2bb";
+    case "Mist":
+    case "Fog": return "#dee2e6";
+    default: return "#e9ecef";
+  }
+}
+
+// Capitalize first letter
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Autofocus input on load
+window.onload = function () {
+  document.getElementById("cityInput").focus();
+  fetchEarthquakeTsunamiAlert();
+  fetchWeatherNews();
+  renderRecentSearches();
+};
+
+// Let user press enter to get the result
+document.getElementById("cityInput").addEventListener("keydown", function (event) {
+  if (event.key === "Enter") showForecast();
+});
+
+// Get selected units
+function getSelectedUnits() {
+  const tempUnit = document.getElementById('unitTemp').value;
+  const windUnit = document.getElementById('unitWind').value;
+  return { tempUnit, windUnit };
+}
+
+// Convert wind speed to km/h if needed
+function convertWindSpeed(speed, unit) {
+  if (unit === 'metric') return (speed * 3.6).toFixed(1);
+  else return speed.toFixed(1);
+}
+
+// Fetch and show hourly forecast (next 12 hours)
+async function getHourlyWeather() {
+  const city = document.getElementById("cityInput").value.trim();
+  const { tempUnit, windUnit } = getSelectedUnits();
+  if (!city) {
+    document.getElementById("weatherResult").innerHTML = '<p class="error">Please enter a city name.</p>';
+    return;
+  }
+  try {
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=${tempUnit}`
+    );
+    if (response.ok) {
+      const data = await response.json();
+      displayHourlyWeather(data, tempUnit, windUnit);
+    } else {
+      document.getElementById("weatherResult").innerHTML = `<p class="error">Sorry, I couldn't find "${city}". Please try another city.</p>`;
+    }
+  } catch (e) {
+    document.getElementById("weatherResult").innerHTML = `<p class="error">Network error. Please try again later.</p>`;
+  }
+}
+
+// Display next 12 hours of forecast
+function displayHourlyWeather(data, tempUnit, windUnit) {
+  const weatherResult = document.getElementById("weatherResult");
+  const tempSymbol = tempUnit === 'imperial' ? '°F' : '°C';
+  const windSymbol = windUnit === 'imperial' ? 'mph' : 'km/h';
+  weatherResult.innerHTML = `<h2>Next 12 hours in <span style='color:#0077b6'>${data.city.name}</span>:</h2>`;
+  const hourlyForecasts = data.list.slice(0, 12);
+  hourlyForecasts.forEach((forecast) => {
+    const dateObj = new Date(forecast.dt_txt);
+    const date = dateObj.toLocaleDateString(undefined, {
+      weekday: "short", month: "short", day: "numeric"
+    });
+    const time = dateObj.toLocaleTimeString(undefined, {
+      hour: "2-digit", minute: "2-digit",
+    });
+    const icon = forecast.weather[0].icon;
+    const iconUrl = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+    const main = forecast.weather[0].main;
+    const iconBg = getIconBgColor(main);
+    const temp = forecast.main.temp;
+    const description = capitalize(forecast.weather[0].description);
+    const humidity = forecast.main.humidity;
+    const windSpeed = convertWindSpeed(forecast.wind.speed, windUnit);
+    const chanceOfRain = forecast.pop ? (forecast.pop * 100).toFixed(0) : 0;
+
+    weatherResult.innerHTML += `
+      <div class="forecast">
+          <h3 style="margin-bottom:0.2em;">${date} ${time}</h3>
+          <div class="icon-bg" style="background:${iconBg}">
+              <img src="${iconUrl}" alt="${description}">
+          </div>
+          <p style="font-size:1.1em;"><strong>${description}</strong></p>
+          <p>🌡️ <strong>${temp}${tempSymbol}</strong> (feels like <strong>${forecast.main.feels_like}${tempSymbol}</strong>)</p>
+          <p>💧 Humidity: <strong>${humidity}%</strong></p>
+          <p>💨 Wind: <strong>${windSpeed} ${windSymbol}</strong></p>
+          <p>🌧️ Chance of rain: <strong>${chanceOfRain}%</strong></p>
+      </div>
+    `;
+  });
+}
+
+// Show forecast based on user selection
+async function showForecast() {
+  const btn = document.getElementById("forecastBtn");
+  btn.disabled = true;
+  document.getElementById("weatherResult").innerHTML = '<p class="loading">Loading...</p>';
+  const forecastType = document.getElementById("forecastType").value;
+  const city = document.getElementById("cityInput").value.trim();
+  addRecentSearch(city);
+  updateLocalTime();
+  updateAQI(city);
+  if (forecastType === "daily") {
+    await getDailyWeather();
+  } else if (forecastType === "5day") {
+    await getFiveDayWeather();
+  } else if (forecastType === "hourly") {
+    await getHourlyWeather();
+  }
+  btn.disabled = false;
+}
+
+// Fetch and show today's weather
+async function getDailyWeather() {
+  const city = document.getElementById("cityInput").value.trim();
+  const { tempUnit, windUnit } = getSelectedUnits();
+  if (!city) {
+    document.getElementById("weatherResult").innerHTML = '<p class="error">Please enter a city name.</p>';
+    return;
+  }
+  try {
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=${tempUnit}`
+    );
+    if (response.ok) {
+      const data = await response.json();
+      displayDailyWeather(data, tempUnit, windUnit);
+    } else {
+      document.getElementById("weatherResult").innerHTML = `<p class="error">Sorry, I couldn't find "${city}". Please try another city or country.</p>`;
+    }
+  } catch (e) {
+    document.getElementById("weatherResult").innerHTML = `
+      <div class="forecast" style="background:#ffeaea;color:#c00;">
+        <h2>Network Error</h2>
+        <p>Unable to fetch weather data.<br>Please check your internet connection and try again later.</p>
+      </div>
+    `;
+  }
+}
+
+// Fetch and show 5-day forecast
+async function getFiveDayWeather() {
+  const city = document.getElementById("cityInput").value.trim();
+  const { tempUnit, windUnit } = getSelectedUnits();
+  if (!city) {
+    document.getElementById("weatherResult").innerHTML = '<p class="error">Please enter a city name.</p>';
+    return;
+  }
+  try {
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=${tempUnit}`
+    );
+    if (response.ok) {
+      const data = await response.json();
+      displayFiveDayWeather(data, tempUnit, windUnit);
+    } else {
+      document.getElementById("weatherResult").innerHTML = `<p class="error">Sorry, I couldn't find "${city}". Please try another city or country.</p>`;
+    }
+  } catch (e) {
+    document.getElementById("weatherResult").innerHTML = `<p class="error">Network error. Please try again later.</p>`;
+  }
+}
+
+// Show today's weather
+function displayDailyWeather(data, tempUnit, windUnit) {
+  const weatherResult = document.getElementById("weatherResult");
+  const tempSymbol = tempUnit === 'imperial' ? '°F' : '°C';
+  const windSymbol = windUnit === 'imperial' ? 'mph' : 'km/h';
+  const windSpeed = convertWindSpeed(data.wind.speed, windUnit);
+  const icon = data.weather[0].icon;
+  const iconUrl = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+  const main = data.weather[0].main;
+  const iconBg = getIconBgColor(main);
+  const chanceOfRain = data.weather[0].main === "Rain" ? 100 : 0;
+  const description = capitalize(data.weather[0].description);
+
+  weatherResult.innerHTML = `
+      <div class="forecast" id="todayForecast" style="cursor:pointer; position:relative;">
+          <h2>Right now in <span style='color:#0077b6'>${data.name}</span>:</h2>
+          <div class="icon-bg" style="background:${iconBg}">
+              <img src="${iconUrl}" alt="${description}">
+          </div>
+          <p style="font-size:1.1em;">It's <strong>${description}</strong> and <strong>${data.main.temp}${tempSymbol}</strong> (feels like <strong>${data.main.feels_like}${tempSymbol}</strong>).</p>
+          <p>💧 Humidity: <strong>${data.main.humidity}%</strong></p>
+          <p>💨 Wind: <strong>${windSpeed} ${windSymbol}</strong></p>
+          <p>🌧️ Chance of rain: <strong>${chanceOfRain}%</strong></p>
+          <div id="weatherDetails" style="display:none;margin-top:10px;"></div>
+          <div id="expandHint" style="text-align:center;color:#0077b6;font-size:0.98em;margin-top:8px;">Tap for more details</div>
+      </div>
+  `;
+  updateSunTimes(data.sys.sunrise, data.sys.sunset);
+  let alert = "";
+  if (data.wind.speed > 15) alert += "High wind! ";
+  if (data.main.temp > 40) alert += "Extreme heat! ";
+  updateSevereAlert(alert);
+
+  document.getElementById("todayForecast").onclick = function () {
+    const details = document.getElementById("weatherDetails");
+    const hint = document.getElementById("expandHint");
+    setTimeout(() => {
+      const sunTimes = document.getElementById("sunTimes").textContent.replace(/\n/g, "<br>");
+      const airQuality = document.getElementById("aqi").textContent;
+      if (details.style.display === "none") {
+        details.style.display = "block";
+        hint.textContent = "Tap to hide details";
+        details.innerHTML = `
+          <div style="padding:10px 0 0 0;">
+            <strong>More Details:</strong><br>
+            Pressure: <strong>${data.main.pressure} hPa</strong><br>
+            Visibility: <strong>${(data.visibility / 1000).toFixed(1)} km</strong><br>
+            Min Temp: <strong>${data.main.temp_min}${tempSymbol}</strong><br>
+            Max Temp: <strong>${data.main.temp_max}${tempSymbol}</strong><br>
+            Cloudiness: <strong>${data.clouds.all}%</strong><br>
+            Weather ID: <strong>${data.weather[0].id}</strong><br>
+            <hr style="margin:8px 0;">
+            🌅 <strong>Sun Times:</strong> <span>${sunTimes}</span><br>
+            🌫️ <strong>Air Quality:</strong> <span>${airQuality}</span>
+          </div>
+        `;
+      } else {
+        details.style.display = "none";
+        hint.textContent = "Tap for more details";
+        details.innerHTML = "";
+      }
+    }, 100);
+  };
+}
+
+// Show 5-day forecast
+function displayFiveDayWeather(data, tempUnit, windUnit) {
+  const weatherResult = document.getElementById("weatherResult");
+  const tempSymbol = tempUnit === 'imperial' ? '°F' : '°C';
+  const windSymbol = windUnit === 'imperial' ? 'mph' : 'km/h';
+  weatherResult.innerHTML = `<h2>5-Day Outlook for <span style='color:#0077b6'>${data.city.name}</span>:</h2>`;
+  const dailyForecasts = data.list.filter((item) =>
+    item.dt_txt.includes("12:00:00")
+  );
+  dailyForecasts.forEach((forecast) => {
+    const date = new Date(forecast.dt_txt).toLocaleDateString(undefined, {
+      weekday: "long", month: "short", day: "numeric",
+    });
+    const icon = forecast.weather[0].icon;
+    const iconUrl = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+    const main = forecast.weather[0].main;
+    const iconBg = getIconBgColor(main);
+    const temp = forecast.main.temp;
+    const description = capitalize(forecast.weather[0].description);
+    const humidity = forecast.main.humidity;
+    const windSpeed = convertWindSpeed(forecast.wind.speed, windUnit);
+    const chanceOfRain = forecast.pop ? (forecast.pop * 100).toFixed(0) : 0;
+
+    weatherResult.innerHTML += `
+      <div class="forecast" style="background:${iconBg};">
+        <h3>${date}</h3>
+        <div class="icon-bg" style="background:${iconBg}">
+          <img src="${iconUrl}" alt="${description}">
+        </div>
+        <p style="font-size:1.1em;"><strong>${description}</strong></p>
+        <p>🌡️ <strong>${temp}${tempSymbol}</strong></p>
+        <p>💧 Humidity: <strong>${humidity}%</strong></p>
+        <p>💨 Wind: <strong>${windSpeed} ${windSymbol}</strong></p>
+        <p>🌧️ Chance of rain: <strong>${chanceOfRain}%</strong></p>
+      </div>
+    `;
+  });
+}
+
+// Fetch and display real earthquake alerts (show recent events)
+async function fetchEarthquakeTsunamiAlert() {
+  let alertMsg = "No current alerts.";
+  try {
+    const eqRes = await fetch(
+      "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
+    );
+    let eqAlert = "";
+    if (eqRes.ok) {
+      const eqData = await eqRes.json();
+      if (eqData.features && eqData.features.length > 0) {
+        eqAlert = '<span style="font-size:1.35em;"><b>Recent Earthquakes:</b></span><br>';
+        eqData.features.slice(0, 10).forEach((eq) => {
+          const mag = eq.properties.mag;
+          const place = eq.properties.place;
+          const time = new Date(eq.properties.time).toLocaleString();
+          eqAlert += `🌎 M${mag} - ${place} (${time})<br>`;
+        });
+      }
+    }
+    document.getElementById("alertMessage").innerHTML = eqAlert || alertMsg;
+  } catch (e) {
+    document.getElementById("alertMessage").innerHTML = alertMsg;
+    console.error("Error fetching earthquake data:", e);
+  }
+}
+
+// Weather Facts Rotator
+const facts = [
+  "The highest temperature ever recorded on Earth was 56.7°C (134°F) in Death Valley, California.",
+  "Lightning strikes the Earth about 8.6 million times a day.",
+  "The coldest temperature ever recorded was -89.2°C (-128.6°F) at Vostok Station, Antarctica.",
+  "Raindrops can fall at speeds of about 22 miles per hour.",
+  "A cubic mile of ordinary fog contains less than a gallon of water.",
+  "Snowflakes can fall at speeds as slow as 1 mph.",
+  "The wettest place on Earth is Mawsynram, India.",
+  "The fastest wind speed ever recorded was 253 mph during Tropical Cyclone Olivia."
+];
+function rotateFact() {
+  const fact = facts[Math.floor(Math.random() * facts.length)];
+  document.getElementById("weatherFact").textContent = fact;
+}
+rotateFact();
+setInterval(rotateFact, 8000);
+
+// Local Time & Date (shows local time for the input city)
+async function updateLocalTime() {
+  const city = document.getElementById("cityInput").value.trim();
+  if (!city) {
+    document.getElementById("localTime").textContent = "--";
+    return;
+  }
+  try {
+    const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${apiKey}`);
+    const geoData = await geoRes.json();
+    if (!geoData.length) {
+      document.getElementById("localTime").textContent = "--";
+      return;
+    }
+    const { lat, lon, country } = geoData[0];
+    const tzRes = await fetch(`https://secure.geonames.org/timezoneJSON?lat=${lat}&lng=${lon}&username=jolibee`);
+    const tzData = await tzRes.json();
+    if (tzData.time) {
+      document.getElementById("localTime").textContent = `${tzData.time} (${country})`;
+    } else {
+      document.getElementById("localTime").textContent = "--";
+    }
+  } catch {
+    document.getElementById("localTime").textContent = "--";
+  }
+}
+setInterval(updateLocalTime, 10000);
+document.getElementById("cityInput").addEventListener("input", updateLocalTime);
+
+// Sunrise & Sunset Times (updates on forecast)
+function updateSunTimes(sunrise, sunset) {
+  if (sunrise && sunset) {
+    const sr = new Date(sunrise * 1000).toLocaleTimeString();
+    const ss = new Date(sunset * 1000).toLocaleTimeString();
+    document.getElementById("sunTimes").textContent = `Sunrise: ${sr}\nSunset: ${ss}`;
+  } else {
+    document.getElementById("sunTimes").textContent = "--";
+  }
+}
+
+// Air Quality Index (updates on forecast)
+async function updateAQI(city) {
+  if (!city) {
+    document.getElementById("aqi").textContent = "--";
+    return;
+  }
+  try {
+    const res = await fetch(`https://api.waqi.info/feed/${encodeURIComponent(city)}/?token=demo`);
+    const data = await res.json();
+    if (data.status === "ok") {
+      document.getElementById("aqi").textContent = `AQI: ${data.data.aqi}`;
+    } else {
+      document.getElementById("aqi").textContent = "Unavailable";
+    }
+  } catch {
+    document.getElementById("aqi").textContent = "Unavailable";
+  }
+}
+
+// Severe Weather Alerts (demo, updates on forecast)
+function updateSevereAlert(alert) {
+  document.getElementById("severeAlert").textContent = alert || "No severe weather alerts.";
+}
+
+// Theme Switcher (slider)
+const themeSlider = document.getElementById("themeSlider");
+const themeLabel = document.getElementById("themeLabel");
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme === "dark" || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  document.body.classList.add("dark-theme");
+  themeSlider.checked = true;
+  themeLabel.textContent = "Light Mode";
+} else {
+  document.body.classList.remove("dark-theme");
+  themeSlider.checked = false;
+  themeLabel.textContent = "Dark Mode";
+}
+themeSlider.onchange = function () {
+  document.body.classList.toggle("dark-theme");
+  if (document.body.classList.contains("dark-theme")) {
+    themeLabel.textContent = "Light Mode";
+    localStorage.setItem("theme", "dark");
+  } else {
+    themeLabel.textContent = "Dark Mode";
+    localStorage.setItem("theme", "light");
+  }
+};
+
+// Recent Searches
+function addRecentSearch(city) {
+  if (!city) return;
+  let searches = JSON.parse(localStorage.getItem("recentSearches") || "[]");
+  searches = searches.filter(c => c.toLowerCase() !== city.toLowerCase());
+  searches.unshift(city);
+  if (searches.length > 5) searches = searches.slice(0, 5);
+  localStorage.setItem("recentSearches", JSON.stringify(searches));
+  renderRecentSearches();
+}
+function renderRecentSearches() {
+  let searches = JSON.parse(localStorage.getItem("recentSearches") || "[]");
+  const ul = document.getElementById("recentSearches");
+  ul.innerHTML = "";
+  searches.forEach(city => {
+    const li = document.createElement("li");
+    li.style.cursor = "pointer";
+    li.textContent = city;
+    li.onclick = () => {
+      document.getElementById("cityInput").value = city;
+      showForecast();
+    };
+    ul.appendChild(li);
+  });
+}
+document.getElementById("clearRecentBtn").onclick = function () {
+  localStorage.removeItem("recentSearches");
+  renderRecentSearches();
+};
+
+// Fetch and display weather news
+async function fetchWeatherNews() {
+  try {
+    const res = await fetch('https://newsapi.org/v2/everything?q=singapore%20weather%20forecast&language=en&pageSize=5&sortBy=publishedAt&apiKey=' + apiNews);
+    const data = await res.json();
+    if (data.articles && data.articles.length > 0) {
+      document.getElementById("weatherNews").innerHTML = data.articles
+        .map(article => `
+      <div class="news-card">
+        ${article.urlToImage 
+          ? `<img src="${article.urlToImage}" alt="news image">` 
+          : `<img src="https://via.placeholder.com/60x60?text=No+Image" alt="no image">`}
+        <div>
+          <a href="${article.url}" target="_blank">${article.title}</a>
+          ${article.source && article.source.name ? `<div class="source">${article.source.name}</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+    } else if (data.message) {
+      document.getElementById("weatherNews").textContent = "API error: " + data.message;
+    } else {
+      document.getElementById("weatherNews").textContent = "No news found. Try again later.";
+    }
+  } catch (e) {
+    document.getElementById("weatherNews").textContent = "Unable to load news.";
+    console.error("Weather News fetch error:", e);
+  }
+}
+</script>
+  </body>
+</html>

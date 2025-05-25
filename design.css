@@ -14,6 +14,9 @@ header {
   border-bottom-right-radius: 30px;
   box-shadow: 0 2px 12px rgba(0, 119, 182, 0.08);
   margin-bottom: 30px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
 }
 h1 {
   font-size: 2.3em;
@@ -282,11 +285,96 @@ h1 {
   margin-top: 2px;
 }
 
-/* Responsive Design */
+/* Sidebar close/open button styles */
+.sidebar-close-btn, .sidebar-open-btn {
+  display: none;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 30;
+  background: #fff;
+  color: #0077b6;
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  font-size: 1.7em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  transition: background 0.2s;
+}
+.sidebar-close-btn:hover, .sidebar-open-btn:hover {
+  background: #e0eafc;
+}
 @media (max-width: 900px) {
-  .sidebar {
-    display: none;
+  .sidebar-close-btn {
+    display: block;
+    position: absolute;
+    top: 10px;
+    left: 10px;
   }
+  .sidebar-open-btn {
+    display: block;
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 100;
+    background: #fff;
+    color: #0077b6;
+  }
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 99;
+    transition: transform 0.3s ease;
+    transform: translateX(0);
+  }
+  .sidebar.closed {
+    transform: translateX(-110%);
+  }
+}
+
+/* Right sidebar open/close button styles */
+@media (max-width: 900px) {
+  .right-sidebar {
+    right: 0;
+    left: auto;
+    top: 0;
+    height: 100vh;
+    position: fixed;
+    z-index: 99;
+    transition: transform 0.3s ease;
+    transform: translateX(0);
+  }
+  .right-sidebar.closed {
+    transform: translateX(110%);
+  }
+  #openRightSidebarBtn {
+    display: block;
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    left: auto;
+    z-index: 100;
+    background: #fff;
+    color: #0077b6;
+  }
+  #closeRightSidebarBtn {
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    left: auto;
+  }
+}
+@media (min-width: 901px) {
+  #openRightSidebarBtn, #closeRightSidebarBtn {
+    display: none !important;
+  }
+}
+@media (max-width: 900px) {
   #mainContentWrapper {
     margin-left: auto;
     margin-right: auto;

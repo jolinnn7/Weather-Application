@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="design.css">
 </head>
 <body class="dark-theme">
+  <!-- Open Sidebar Button -->
+  <button id="openSidebarBtn" class="sidebar-open-btn" aria-label="Open Sidebar">&#9776;</button>
+  <button id="openRightSidebarBtn" class="sidebar-open-btn" aria-label="Open Right Sidebar" style="right:18px;left:auto;">&#9776;</button>
+
   <!-- Header -->
   <header>
     <h1>🌦️ Weather Forecast</h1>
@@ -14,7 +18,8 @@
   </header>
 
   <!-- Left Sidebar -->
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
+    <button id="closeSidebarBtn" class="sidebar-close-btn" aria-label="Close Sidebar">&times;</button>
     <!-- Weather Fact Rotator -->
     <div>
       <h3>🌤️ Weather Fact</h3>
@@ -52,7 +57,8 @@
   </div>
 
   <!-- Right Sidebar -->
-  <div class="sidebar right-sidebar">
+  <div class="sidebar right-sidebar" id="rightSidebar">
+    <button id="closeRightSidebarBtn" class="sidebar-close-btn" aria-label="Close Sidebar">&times;</button>
     <h3>📰 Weather News</h3>
     <div id="weatherNews" class="fact">Loading news...</div>
   </div>
@@ -571,6 +577,70 @@
         console.error("Weather News fetch error:", e);
       }
     }
+
+    // Sidebar toggle logic for small screens
+    document.addEventListener('DOMContentLoaded', function() {
+      // Left sidebar logic
+      const sidebar = document.getElementById('sidebar');
+      const closeBtn = document.getElementById('closeSidebarBtn');
+      const openBtn = document.getElementById('openSidebarBtn');
+
+      function closeSidebar() {
+        sidebar.classList.add('closed');
+        openBtn.style.display = 'block';
+      }
+      function openSidebar() {
+        sidebar.classList.remove('closed');
+        openBtn.style.display = 'none';
+      }
+
+      if (closeBtn && openBtn && sidebar) {
+        closeBtn.addEventListener('click', closeSidebar);
+        openBtn.addEventListener('click', openSidebar);
+
+        function handleResize() {
+          if (window.innerWidth > 900) {
+            sidebar.classList.remove('closed');
+            openBtn.style.display = 'none';
+          } else {
+            openBtn.style.display = sidebar.classList.contains('closed') ? 'block' : 'none';
+          }
+        }
+        window.addEventListener('resize', handleResize);
+        handleResize();
+      }
+
+      // Right sidebar logic
+      const rightSidebar = document.getElementById('rightSidebar');
+      const closeRightBtn = document.getElementById('closeRightSidebarBtn');
+      const openRightBtn = document.getElementById('openRightSidebarBtn');
+
+      function closeRightSidebar() {
+        rightSidebar.classList.add('closed');
+        openRightBtn.style.display = 'block';
+      }
+      function openRightSidebar() {
+        rightSidebar.classList.remove('closed');
+        openRightBtn.style.display = 'none';
+      }
+
+      if (closeRightBtn && openRightBtn && rightSidebar) {
+        closeRightBtn.addEventListener('click', closeRightSidebar);
+        openRightBtn.addEventListener('click', openRightSidebar);
+
+        function handleRightResize() {
+          if (window.innerWidth > 900) {
+            rightSidebar.classList.remove('closed');
+            openRightBtn.style.display = 'none';
+          } else {
+            openRightBtn.style.display = rightSidebar.classList.contains('closed') ? 'block' : 'none';
+          }
+        }
+        window.addEventListener('resize', handleRightResize);
+        handleRightResize();
+      }
+    });
   </script>
 </body>
-</html>
+</html></html>
+

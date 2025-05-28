@@ -63,6 +63,37 @@ h1 {
   border-left: 6px solid #adb5bd;
 }
 
+/* Dark mode: different weather type backgrounds */
+body.dark-theme .forecast.weather-clear {
+  background: linear-gradient(135deg, #3a3700 60%, #ffe06633 100%);
+  border-left: 6px solid #ffe066;
+}
+body.dark-theme .forecast.weather-clouds {
+  background: linear-gradient(135deg, #23272b 60%, #5c6770 100%);
+  border-left: 6px solid #adb5bd;
+}
+body.dark-theme .forecast.weather-rain {
+  background: linear-gradient(135deg, #1a2633 60%, #228be655 100%);
+  border-left: 6px solid #74c0fc;
+}
+body.dark-theme .forecast.weather-thunderstorm {
+  background: linear-gradient(135deg, #2d2540 60%, #9775fa55 100%);
+  border-left: 6px solid #9775fa;
+}
+body.dark-theme .forecast.weather-drizzle {
+  background: linear-gradient(135deg, #1e2d26 60%, #38d9a955 100%);
+  border-left: 6px solid #38d9a9;
+}
+body.dark-theme .forecast.weather-snow {
+  background: linear-gradient(135deg, #232526 60%, #e3e8ee33 100%);
+  border-left: 6px solid #dee2e6;
+}
+body.dark-theme .forecast.weather-mist,
+body.dark-theme .forecast.weather-fog {
+  background: linear-gradient(135deg, #232526 60%, #adb5bd33 100%);
+  border-left: 6px solid #adb5bd;
+}
+
 /* Forecast Card Styles */
 .forecast {
   margin-top: 18px;
@@ -200,7 +231,7 @@ h1 {
   position: fixed;
   top: 100px;
   left: 0;
-  width: 220px;
+  width: 323px;
   height: calc(100% - 120px);
   background: linear-gradient(135deg, #f1f8ff 60%, #e0eafc 100%);
   border-top-right-radius: 24px;
@@ -216,6 +247,7 @@ h1 {
 .sidebar.right-sidebar {
   left: auto;
   right: 0;
+  width: 323px;
   border-top-left-radius: 24px;
   border-bottom-left-radius: 24px;
   border-top-right-radius: 0;
@@ -229,6 +261,8 @@ h1 {
   color: #0077b6;
   border-bottom: 1px solid #b5d0e6;
   padding-bottom: 3px;
+  text-align: center;
+  width: 100%;
 }
 .sidebar > div {
   margin-bottom: 22px;
@@ -361,13 +395,13 @@ body.dark-theme #forecastBtn {
   color: #232526;
 }
 body.dark-theme #forecastBtn:hover:enabled {
-  background: #ffd60a;
+  background: #0e0e0c;
 }
 body.dark-theme .unit-row label {
   color: #ffe066;
 }
 body.dark-theme .error {
-  color: #ff6b6b;
+  color: #7f2b2b;
 }
 body.dark-theme .loading {
   color: #b5d0e6;
@@ -409,4 +443,22 @@ input:checked + .slider {
 }
 input:checked + .slider:before {
   transform: translateX(22px);
+}
+
+/* Center content in left sidebar for Local Time, Theme, and Recent Searches */
+.sidebar:not(.right-sidebar) > div {
+  width: 100%;
+  text-align: center;
+}
+.sidebar:not(.right-sidebar) #localTime,
+.sidebar:not(.right-sidebar) #themeLabel,
+.sidebar:not(.right-sidebar) .switch,
+.sidebar:not(.right-sidebar) #recentSearches,
+.sidebar:not(.right-sidebar) #clearRecentBtn {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+.sidebar:not(.right-sidebar) #recentSearches {
+  padding-left: 0;
 }

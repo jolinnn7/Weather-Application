@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="design.css">
 </head>
 <body class="dark-theme">
+  <!-- Menu Button
+  <button id="sidebarToggle" class="mobile-sidebar-btn">☰ Menu</button> -->
   <!-- Header -->
   <header>
     <h1>🌦️ Weather Forecast</h1>
@@ -102,7 +104,7 @@
   <script>
     // --- API Keys ---
     const apiKey = "98721cea9b33f91f1d676549e01a829b"; // OpenWeatherMap API Key
-    const apiNews = "b42163efcff94454bbfcc8477dc84452"; // NewsAPI Key
+    const gnewsApiKey = "b777b96a1481c673ea5e6491b44c93ad"; // GNews API key
 
     // --- Utility Functions ---
     function getIconBgColor(main) {
@@ -546,14 +548,14 @@
     // --- Weather News ---
     async function fetchWeatherNews() {
       try {
-        const res = await fetch('https://newsapi.org/v2/everything?q=singapore%20weather%20forecast&language=en&pageSize=5&sortBy=publishedAt&apiKey=' + apiNews);
+        const res = await fetch(`https://gnews.io/api/v4/search?q=weather&lang=en&max=5&token=${gnewsApiKey}`);
         const data = await res.json();
         if (data.articles && data.articles.length > 0) {
           document.getElementById("weatherNews").innerHTML = data.articles
             .map(article => `
           <div class="news-card">
-            ${article.urlToImage 
-              ? `<img src="${article.urlToImage}" alt="news image">` 
+            ${article.image 
+              ? `<img src="${article.image}" alt="news image">` 
               : `<img src="https://via.placeholder.com/60x60?text=No+Image" alt="no image">`}
             <div>
               <a href="${article.url}" target="_blank">${article.title}</a>
@@ -561,8 +563,6 @@
             </div>
           </div>
         `).join('');
-        } else if (data.message) {
-          document.getElementById("weatherNews").textContent = "API error: " + data.message;
         } else {
           document.getElementById("weatherNews").textContent = "No news found. Try again later.";
         }

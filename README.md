@@ -1,3 +1,5 @@
+link to website: https://jolinnn7.github.io/Weather-Application/
+
 # Weather Application
 
 The Weather Application is a user-friendly platform designed to provide accurate and real-time weather forecasts, earthquake alerts, and air quality updates. With a sleek and responsive interface, users can easily access hourly, daily, and 5-day weather forecasts for any city worldwide. The application also features a dark mode, customizable units for temperature and wind speed, and a rotating weather fact section to keep users informed and engaged.

@@ -128,4 +128,39 @@ To ensure the Weather Application works as intended, all user stories from the U
 
 For detailed test results, refer to the `tests` directory or the [Testing Documentation](./tests/README.md).
 
+# Deployment
+
+The Weather Application is deployed using **GitHub Pages** and is accessible at:  
+[https://jolinnn7.github.io/Weather-Application/](https://jolinnn7.github.io/Weather-Application/)
+
+## Deployment Process
+
+1. **Repository Setup**
+   - The project is stored in a public GitHub repository.
+   - All source code, assets, and documentation are committed to the `main` branch.
+
+2. **Building for Deployment**
+   - Since this is a static web application (HTML, CSS, JavaScript), no build process is required.
+   - All files in the repository are ready for deployment as-is.
+
+3. **Deploying to GitHub Pages**
+   - In the repository settings, GitHub Pages is enabled and set to deploy from the `main` branch (`/root` directory).
+   - After pushing changes to GitHub, the site is automatically updated and available at the provided URL.
+   
+## Differences Between Deployed and Development Versions
+
+- **API Keys:**  
+  - **Development:** API keys for OpenWeatherMap and GNewsAPI are added locally for testing and development.
+  - **Deployment:** API keys are removed or left blank in the public repository for security. Users must add their own API keys locally to run the app with full functionality.
+- **Configuration Files:**  
+  - No separate configuration files are used for deployment. All configuration is handled in the main codebase.
+- **Git Branches:**  
+  - Deployment is done from the `main` branch. No separate deployment branch is used.
+
+## Running the Application Locally
+
+1. **Clone the Repository**
+   ```sh
+   git clone https://github.com/jolinnn7/Weather-Application.git
+   cd Weather-Application
 

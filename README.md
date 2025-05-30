@@ -2,21 +2,19 @@ link to website: https://jolinnn7.github.io/Weather-Application/
 
 # Weather Application
 
-The Weather Application is a user-friendly platform designed to provide accurate and real-time weather forecasts, earthquake alerts, and air quality updates. With a sleek and responsive interface, users can easily access hourly, daily, and 5-day weather forecasts for any city worldwide. The application also features a dark mode, customizable units for temperature and wind speed, and a rotating weather fact section to keep users informed and engaged.
+The Weather Application is a user-friendly platform designed to provide accurate and real-time weather forecasts, earthquake alerts, and air quality updates. With a sleek and responsive interface, users can easily access hourly, daily, and 5-day weather forecasts for any city/country worldwide. The application also features a dark mode, customizable units for temperature and wind speed, and a rotating weather fact section to keep users informed and engaged.
 
-Additionally, the app integrates earthquake and tsunami alerts, local time updates, and curated weather-related news articles. By combining essential weather data with a visually appealing design, the Weather Application aims to be your go-to dashboard for staying informed about the environment around you.
+Additionally, the app integrates earthquake and alerts, local time updates, and curated weather-related news articles. By combining essential weather data with a visually appealing design, the Weather Application aims to be your go-to dashboard for staying informed about the environment around you.
 
 # UX
 
 The Weather Application is designed for individuals who want to stay informed about weather conditions, environmental alerts, and related news in a convenient and visually appealing way. The target audience includes travelers, outdoor enthusiasts, and anyone who needs accurate and timely weather updates to plan their day or stay safe during extreme conditions.
 
-## User Stories
-
 - As a traveler, I want to check the weather forecast for my destination, so that I can pack appropriately.
 - As an outdoor enthusiast, I want to know the air quality index, so that I can decide if it’s safe to exercise outside.
-- As a concerned citizen, I want to receive earthquake and tsunami alerts, so that I can take necessary precautions.
+- As a concerned citizen, I want to receive earthquake alerts, so that I can take necessary precautions.
 - As a casual user, I want to read interesting weather facts, so that I can learn something new while using the app.
-- As a user, I want to switch between light and dark modes, so that I can use the app comfortably in different lighting conditions.
+- As a user, I want to be able to switch between light and dark modes, so that I can use the app comfortably in different lighting conditions.
 - As a news reader, I want to see curated weather-related news articles, so that I can stay updated on global weather events.
 
 ## Design Process
